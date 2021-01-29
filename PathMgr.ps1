@@ -152,7 +152,7 @@ function IsDirInPath {
   $intPathType = GetSystemOrUser $pathType
   $findType = $null
   $result = $PathMgr::IsDirInPath($dirName,$intPathType,[Ref] $findType)
-  if ( ($result -eq 0) ) {
+  if ( $result -eq 0 ) {
     $result = $findType
   }
   $result

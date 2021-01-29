@@ -59,6 +59,7 @@ function IsDirInPath(const DirName: pwidechar; const PathType: DWORD; FindType: 
   var
     PathFindType: TPathFindType;
   begin
+  if PathType > 1 then exit(ERROR_INVALID_PARAMETER);
   result := wsIsDirInPath(DirName, TPathType(PathType), PathFindType);
   FindType^ := DWORD(PathFindType);
   end;
