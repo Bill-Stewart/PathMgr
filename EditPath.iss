@@ -27,7 +27,7 @@
 ; * At uninstall, removes dir from Path if custom setting present
 ; * Unloads and deletes DLL and removes app dir at uninstall deinitialize
 
-#if ComparePackedVersion(Ver, 6) < 0
+#if Ver < 0x06000000
   #error This script requires Inno Setup 6 or later
 #endif
 
