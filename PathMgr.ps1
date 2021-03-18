@@ -93,7 +93,7 @@ public static extern uint RemoveDirFromPath(
   string DirName,
   uint   PathType
 );
-"@ -f (Get-Platform)
+"@ -f (Join-Path (Get-Location).Path (Get-Platform)) -replace '\\','\\'
 
 $PathMgr = Add-Type -Name PathMgr `
   -MemberDefinition $APIDefs `

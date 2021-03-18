@@ -34,7 +34,7 @@
 [Setup]
 AppId={{A17D2D05-C729-4F2A-9CC7-E04906C5A842}
 AppName=EditPath
-AppVersion=4.0.0.0
+AppVersion=4.0.2.0
 UsePreviousAppDir=false
 DefaultDirName={autopf}\EditPath
 Uninstallable=true
@@ -125,7 +125,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
   if CurStep = ssPostInstall then
     begin
     // Add app directory to Path at post-install step if task selected
-    if WizardIsTaskSelected(MODIFY_PATH_TASK_NAME) then
+    if PathIsModified or WizardIsTaskSelected(MODIFY_PATH_TASK_NAME) then
       AddDirToPath(ExpandConstant('{app}'));
     end;
   end;
