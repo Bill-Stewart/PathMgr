@@ -36,6 +36,8 @@ PathMgr.dll provides an API for managing the `Path` value in the system location
 
 PathMgr.dll is designed for applications (such as installers) that don't provide a built-in set of APIs or interfaces to manage the system or current user Path. There are both 32-bit (x86) and 64-bit (x64) versions.
 
+If you prefer, the EditPath program is a command-line tool that provides the same functionality as PathMgr.dll. (EditPath does not require PathMgr.dll.)
+
 # Functions
 
 This section documents the functions exported by PathMgr.dll.
@@ -55,7 +57,7 @@ DWORD AddDirToPath(LPWSTR DirName; DWORD PathType; DWORD AddType);
 
 Pascal:
 ```
-function AddDirToPath(DirName: pwidechar; PathType, AddType: DWORD): DWORD;
+function AddDirToPath(DirName: PWideChar; PathType, AddType: DWORD): DWORD;
 ```
 
 ### Parameters
@@ -103,7 +105,7 @@ DWORD GetPath(DWORD PathType; DWORD Expand; Buffer: LPWSTR; DWORD NumChars);
 
 Pascal:
 ```
-function GetPath(PathType, Expand: DWORD; Buffer: pwidechar; NumChars: DWORD): DWORD;
+function GetPath(PathType, Expand: DWORD; Buffer: PWideChar; NumChars: DWORD): DWORD;
 ```
 
 ### Parameters
@@ -143,7 +145,7 @@ DWORD IsDirInPath(LPWSTR DirName; DWORD PathType; FindType: PDWORD);
 
 Pascal:
 ```
-function IsDirInPath(DirName: pwidechar; PathType: DWORD; FindType: PDWORD): DWORD;
+function IsDirInPath(DirName: PWideChar; PathType: DWORD; FindType: PDWORD): DWORD;
 ```
 
 ### Parameters
@@ -224,7 +226,7 @@ DWORD RemoveDirFromPath(LPWSTR DirName; DWORD PathType);
 
 Pascal:
 ```
-function RemoveDirFromPath(DirName: pwidechar; PathType: DWORD): DWORD;
+function RemoveDirFromPath(DirName: PWideChar; PathType: DWORD): DWORD;
 ```
 
 ### Parameters

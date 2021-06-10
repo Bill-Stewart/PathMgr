@@ -18,25 +18,25 @@ https://github.com/Bill-Stewart/PathMgr/releases/
 
 The system Path is found in the following location in the Windows registry:
 
-Root: `HKEY_LOCAL_MACHINE`
-Subkey: `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`
+Root: `HKEY_LOCAL_MACHINE`  
+Subkey: `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`  
 Value name: `Path`
 
 The current user Path is found in the following location in the registry:
 
-Root: `HKEY_CURRENT_USER`
-Subkey: `Environment`
+Root: `HKEY_CURRENT_USER`  
+Subkey: `Environment`  
 Value name: `Path`
 
 In both cases, the `Path` value is (or should be) the registry type `REG_EXPAND_SZ`, which means that it is a string that can contain values surrounded by `%` characters that Windows will automatically expand to environment variable values. (For example, `%SystemRoot%` will be expanded to `C:\Windows` on most systems.)
 
 The `Path` value contains a `;`-delimited list of directory names that the system should search for executables, library files, scripts, etc. Windows appends the content of the current user Path to the system Path and expands the environment variable references. The resulting string is set as the `Path` environment variable for processes.
 
-EditPath provides an command-line interfacec for managing the `Path` value in the system location (in `HKEY_LOCAL_MACHINE`) and the current user location (in `HKEY_CURRENT_USER`).
+EditPath provides a command-line interface for managing the `Path` value in the system location (in `HKEY_LOCAL_MACHINE`) and the current user location (in `HKEY_CURRENT_USER`).
 
 # Usage
 
-The following describes the command-line usage for the program:
+The following describes the command-line usage for the program. Parameters are case-sensitive.
 
 **EditPath** [_options_] _type_ _action_
 
@@ -51,10 +51,10 @@ You must specify only one of the following _action_ parameters:
 
 | _action_                     | Abbreviation           | Description
 | --------                     | ------------           | -----------
-| **--list**                   | **-l "**_dirname_**"** | Lists directories in Path
+| **--list**                   | **-l**                 | Lists directories in Path
 | **--test "**_dirname_**"**   | **-t "**_dirname_**"** | Tests if directory exists in Path
 | **--add "**_dirname_**"**    | **-a "**_dirname_**"** | Adds directory to Path
-| **--remove "**_dirname_**"** | **-r "**_dirname_**"** | Remove directory from Path
+| **--remove "**_dirname_**"** | **-r "**_dirname_**"** | Removes directory from Path
 
 The following parameters are optional:
 
@@ -101,11 +101,11 @@ The following table lists typical exit codes when using **--test** (**-t**).
 
 # Examples
 
-1. `EditPath --expand --system --list`
+1.  `EditPath --expand --system --list`
 
-    This command outputs the directories in the system Path, with environment variables expanded. You can also write this command as `EditPath -e -s -l`.
+    This command outputs the directories in the system Path, with environment variables expanded. You can also write this command as `EditPath -x -s -l`.
 
-2. `EditPath --user --add "%LOCALAPPDATA%\Programs\MyApp"`
+2.  `EditPath --user --add "%LOCALAPPDATA%\Programs\MyApp"`
 
     Adds the specified directory name to the user Path.
 

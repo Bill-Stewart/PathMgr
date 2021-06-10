@@ -34,7 +34,7 @@
 [Setup]
 AppId={{A17D2D05-C729-4F2A-9CC7-E04906C5A842}
 AppName=EditPath
-AppVersion=4.0.2.0
+AppVersion=4.0.3.0
 UsePreviousAppDir=false
 DefaultDirName={autopf}\EditPath
 Uninstallable=true
@@ -64,7 +64,7 @@ const
   MODIFY_PATH_TASK_NAME = 'modifypath';  // Specify name of task
 
 var
-  PathIsModified: boolean;  // Cache task selection from previous installs
+  PathIsModified: Boolean;  // Cache task selection from previous installs
 
 // Import AddDirToPath() at setup time ('files:' prefix)
 function DLLAddDirToPath(DirName: string; PathType, AddType: DWORD): DWORD;
@@ -76,75 +76,81 @@ function DLLRemoveDirFromPath(DirName: string; PathType: DWORD): DWORD;
 
 // Wrapper for AddDirToPath() DLL function
 function AddDirToPath(const DirName: string): DWORD;
-  var
-    PathType, AddType: DWORD;
-  begin
+var
+  PathType, AddType: DWORD;
+begin
   // PathType = 0 - use system Path
   // PathType = 1 - use user Path
   // AddType = 0 - add to end of Path
   // AddType = 1 - add to beginning of Path
-  if IsAdminInstallMode() then PathType := 0 else PathType := 1;
+  if IsAdminInstallMode() then
+    PathType := 0
+  else
+    PathType := 1;
   AddType := 0;
   result := DLLAddDirToPath(DirName, PathType, AddType);
-  end;
+end;
 
 // Wrapper for RemoveDirFromPath() DLL function
 function RemoveDirFromPath(const DirName: string): DWORD;
-  var
-    PathType: DWORD;
-  begin
+var
+  PathType: DWORD;
+begin
   // PathType = 0 - use system Path
   // PathType = 1 - use user Path
-  if IsAdminInstallMode() then PathType := 0 else PathType := 1;
+  if IsAdminInstallMode() then
+    PathType := 0
+  else
+    PathType := 1;
   result := DLLRemoveDirFromPath(DirName, PathType);
-  end;
+end;
 
-procedure RegisterPreviousData(PreviousDataKey: integer);
-  begin
+procedure RegisterPreviousData(PreviousDataKey: Integer);
+begin
   // Store previous or current task selection as custom user setting
   if PathIsModified or WizardIsTaskSelected(MODIFY_PATH_TASK_NAME) then
     SetPreviousData(PreviousDataKey, MODIFY_PATH_TASK_NAME, 'true');
-  end;
+end;
 
-function InitializeSetup(): boolean;
-  begin
+function InitializeSetup(): Boolean;
+begin
   result := true;
   // Was task selected during a previous install?
   PathIsModified := GetPreviousData(MODIFY_PATH_TASK_NAME, '') = 'true';
-  end;
+end;
 
-function InitializeUninstall(): boolean;
-  begin
+function InitializeUninstall(): Boolean;
+begin
   result := true;
   // Was task selected during a previous install?
   PathIsModified := GetPreviousData(MODIFY_PATH_TASK_NAME, '') = 'true';
-  end;
+end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-  begin
+begin
   if CurStep = ssPostInstall then
-    begin
+  begin
     // Add app directory to Path at post-install step if task selected
     if PathIsModified or WizardIsTaskSelected(MODIFY_PATH_TASK_NAME) then
       AddDirToPath(ExpandConstant('{app}'));
-    end;
   end;
+end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
-  begin
+begin
   if CurUninstallStep = usUninstall then
-    begin
+  begin
     // Remove app directory from path during uninstall if task was selected;
     // use variable because we can't use WizardIsTaskSelected() at uninstall
     if PathIsModified then
       RemoveDirFromPath(ExpandConstant('{app}'));
-    end;
   end;
+end;
 
 procedure DeinitializeUninstall();
-  begin
+begin
   // Unload and delete PathMgr.dll and remove app dir when uninstalling
   UnloadDLL(ExpandConstant('{app}\PathMgr.dll'));
   DeleteFile(ExpandConstant('{app}\PathMgr.dll'));
   RemoveDir(ExpandConstant('{app}'));
-  end;
+end;

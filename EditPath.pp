@@ -20,46 +20,46 @@
 {$R *.res}
 {$APPTYPE CONSOLE}
 
-program
-  EditPath;
+program EditPath;
 
 uses
   getopts,
-  windows,
+  Windows,
+  wsPathMgr,
   wsUtilMsg,
-  wsPathMgr;
+  wsUtilStr;
 
 type
   TCommandLine = object
-    ErrorCode: word;
-    ErrorMessage: unicodestring;
-    ArgHelp: boolean;                  // --help/-h
-    ArgQuiet: boolean;                 // --quiet/-q
-    ArgAddToPath: unicodestring;       // --add/-a
-    ArgAddToBeginning: boolean;        // --beginning/-b
-    ArgList: boolean;                  // --list/-l
-    ArgRemoveFromPath: unicodestring;  // --remove/-r
-    ArgPathSystem: boolean;            // --system/-s
-    ArgTest: unicodestring;            // --test/-t
-    ArgPathUser: boolean;              // --user/-u
-    ArgExpand: boolean;                // --expand/-x
-    function CountSetBits(N: DWORD): DWORD;
+    ErrorCode:         Word;
+    ErrorMessage:      UnicodeString;
+    ArgHelp:           Boolean;        // --help/-h
+    ArgQuiet:          Boolean;        // --quiet/-q
+    ArgAddToPath:      UnicodeString;  // --add/-a
+    ArgAddToBeginning: Boolean;        // --beginning/-b
+    ArgList:           Boolean;        // --list/-l
+    ArgRemoveFromPath: UnicodeString;  // --remove/-r
+    ArgPathSystem:     Boolean;        // --system/-s
+    ArgTest:           UnicodeString;  // --test/-t
+    ArgPathUser:       Boolean;        // --user/-u
+    ArgExpand:         Boolean;        // --expand/-x
+    function CountBits(N: DWORD): DWORD;
     procedure Parse();
-    end;
+  end;
 
 var
   CommandLine: TCommandLine;
   PathType: TPathType;
   PathAddType: TPathAddType;
   PathFindType: TPathFindType;
-  OutputStr: unicodestring;
+  OutputStr: UnicodeString;
 
 procedure Usage();
-  const
-    NEWLINE: unicodestring = #13 + #10;
-  var
-    UsageText: unicodestring;
-  begin
+const
+  NEWLINE: UnicodeString = #13 + #10;
+var
+  UsageText: UnicodeString;
+begin
   UsageText := 'EditPath 4.0 - Copyright (C) 2004-2021 by Bill Stewart (bstewart at iname.com)' + NEWLINE
     + NEWLINE
     + 'This is free software and comes with ABSOLUTELY NO WARRANTY.' + NEWLINE
@@ -67,7 +67,7 @@ procedure Usage();
     + 'Usage: EditPath [<options>] <type> <action>' + NEWLINE
     + NEWLINE
     + 'You must specify one of each parameter from <type> and <action> (see below).' + NEWLINE
-    + 'Other <options> are optional.' + NEWLINE
+    + 'Other <options> are optional. Parameters are case-sensitive.' + NEWLINE
     + NEWLINE
     + '<type>    Abbreviation  Description' + NEWLINE
     + '-------------------------------------------------' + NEWLINE
@@ -104,116 +104,116 @@ procedure Usage();
     + '2 - The specified directory exists in the expanded Path' + NEWLINE
     + '3 - The specified directory does not exist in the Path';
   WriteLn(UsageText);
-  end;
+end;
 
-function TCommandLine.CountSetBits(N: DWORD): DWORD;
-  var
-    Count: DWORD = 0;
-  begin
+function TCommandLine.CountBits(N: DWORD): DWORD;
+var
+  Count: DWORD = 0;
+begin
   // Counts the number of bits set in N
   while N <> 0 do
-    begin
+  begin
     Count := Count + (N and 1);
     N := N shr 1;
-    end;
-  result := Count;
   end;
+  result := Count;
+end;
 
 procedure TCommandLine.Parse();
-  const
-    REQ_ARGS_ACTION_NONE     = 0;
-    REQ_ARGS_ACTION_ADD      = 1;
-    REQ_ARGS_ACTION_LIST     = 2;
-    REQ_ARGS_ACTION_REMOVE   = 4;
-    REQ_ARGS_ACTION_TEST     = 8;
-    REQ_ARGS_PATHTYPE_NONE   = 0;
-    REQ_ARGS_PATHTYPE_SYSTEM = 1;
-    REQ_ARGS_PATHTYPE_USER   = 2;
-  var
-    LongOpts: array[1..11] of TOption;
-    Opt: char;
-    I: longint;
-    ReqArgsAction, ReqArgsPathType: DWORD;
-  begin
+const
+  REQ_ARGS_ACTION_NONE     = 0;
+  REQ_ARGS_ACTION_ADD      = 1;
+  REQ_ARGS_ACTION_LIST     = 2;
+  REQ_ARGS_ACTION_REMOVE   = 4;
+  REQ_ARGS_ACTION_TEST     = 8;
+  REQ_ARGS_PATHTYPE_NONE   = 0;
+  REQ_ARGS_PATHTYPE_SYSTEM = 1;
+  REQ_ARGS_PATHTYPE_USER   = 2;
+var
+  LongOpts: array[1..11] of TOption;
+  Opt: Char;
+  I: LongInt;
+  ReqArgsAction, ReqArgsPathType: DWORD;
+begin
   // Set up array of options; requires final option with empty name;
   // set Value member to specify short option match for GetLongOps
   with LongOpts[1] do
-    begin
-    Name    := 'add';
+  begin
+    Name := 'add';
     Has_arg := Required_Argument;
-    Flag    := nil;
-    Value   := 'a';
-    end;
+    Flag := nil;
+    Value := 'a';
+  end;
   with LongOpts[2] do
-    begin
-    Name    := 'beginning';
+  begin
+    Name := 'beginning';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := 'b';
-    end;
+    Flag := nil;
+    Value := 'b';
+  end;
   with LongOpts[3] do
-    begin
-    Name    := 'help';
+  begin
+    Name := 'help';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := 'h';
-    end;
+    Flag := nil;
+    Value := 'h';
+  end;
   with LongOpts[4] do
-    begin
-    Name    := 'list';
+  begin
+    Name := 'list';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := 'l';
-    end;
+    Flag := nil;
+    Value := 'l';
+  end;
   with LongOpts[5] do
-    begin
-    Name    := 'quiet';
+  begin
+    Name := 'quiet';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := 'q';
-    end;
+    Flag := nil;
+    Value := 'q';
+  end;
   with LongOpts[6] do
-    begin
-    Name    := 'remove';
+  begin
+    Name := 'remove';
     Has_arg := Required_Argument;
-    Flag    := nil;
-    Value   := 'r';
-    end;
+    Flag := nil;
+    Value := 'r';
+  end;
   with LongOpts[7] do
-    begin
-    Name    := 'system';
+  begin
+    Name := 'system';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := 's';
-    end;
+    Flag := nil;
+    Value := 's';
+  end;
   with LongOpts[8] do
-    begin
-    Name    := 'test';
+  begin
+    Name := 'test';
     Has_arg := Required_Argument;
-    Flag    := nil;
-    Value   := 't';
-    end;
+    Flag := nil;
+    Value := 't';
+  end;
   with LongOpts[9] do
-    begin
-    Name    := 'user';
+  begin
+    Name := 'user';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := 'u';
-    end;
+    Flag := nil;
+    Value := 'u';
+  end;
   with LongOpts[10] do
-    begin
-    Name    := 'expand';
+  begin
+    Name := 'expand';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := 'x';
-    end;
+    Flag := nil;
+    Value := 'x';
+  end;
   with LongOpts[11] do
-    begin
-    Name    := '';
+  begin
+    Name := '';
     Has_arg := No_Argument;
-    Flag    := nil;
-    Value   := #0;
-    end;
+    Flag := nil;
+    Value := #0;
+  end;
   // Initialize defaults
   ErrorCode := 0;
   ErrorMessage := '';
@@ -221,7 +221,7 @@ procedure TCommandLine.Parse();
   ArgAddToBeginning := false;  // --beginning/-b
   ArgHelp := false;            // --help/-h
   ArgList := false;            // --list/-l
-  ArgQuiet :=  false;          // --quiet/-q
+  ArgQuiet := false;           // --quiet/-q
   ArgRemoveFromPath := '';     // --remove/-r
   ArgPathSystem := false;      // --system/-s
   ArgTest := '';               // --test/-t
@@ -234,63 +234,63 @@ procedure TCommandLine.Parse();
     Opt := GetLongOpts('a:bhlqr:st:ux', @LongOpts, I);
     case Opt of
       'a':
-        begin
+      begin
         ReqArgsAction := ReqArgsAction or REQ_ARGS_ACTION_ADD;
-        ArgAddToPath := unicodestring(OptArg);
-        end;
+        ArgAddToPath := StringToUnicodeString(OptArg);
+      end;
       'b': ArgAddToBeginning := true;
       'h': ArgHelp := true;
       'l':
-        begin
+      begin
         ReqArgsAction := ReqArgsAction or REQ_ARGS_ACTION_LIST;
         ArgList := true;
-        end;
+      end;
       'q': ArgQuiet := true;
       'r':
-        begin
+      begin
         ReqArgsAction := ReqArgsAction or REQ_ARGS_ACTION_REMOVE;
-        ArgRemoveFromPath := unicodestring(OptArg);
-        end;
+        ArgRemoveFromPath := StringToUnicodeString(OptArg);
+      end;
       's':
-        begin
+      begin
         ReqArgsPathType := ReqArgsPathType or REQ_ARGS_PATHTYPE_SYSTEM;
         ArgPathSystem := true;
-        end;
+      end;
       't':
-        begin
+      begin
         ReqArgsAction := ReqArgsAction or REQ_ARGS_ACTION_TEST;
-        ArgTest := unicodestring(OptArg);
-        end;
+        ArgTest := StringToUnicodeString(OptArg);
+      end;
       'u':
-        begin
+      begin
         ReqArgsPathType := ReqArgsPathType or REQ_ARGS_PATHTYPE_USER;
         ArgPathUser := true;
-        end;
+      end;
       'x': ArgExpand := true;
       '?':
-        begin
+      begin
         ErrorCode := ERROR_INVALID_PARAMETER;
         ErrorMessage := 'Incorrect parameter(s). Use --help (-h) for usage.';
-        end;
-      end; //case Opt
+      end;
+    end; //case Opt
   until Opt = EndOfOptions;
   if ErrorCode = 0 then
-    begin
+  begin
     if (ReqArgsAction = REQ_ARGS_ACTION_NONE) or (ReqArgsPathType = REQ_ARGS_PATHTYPE_NONE) then
-      begin
+    begin
       ErrorCode := ERROR_INVALID_PARAMETER;
       ErrorMessage := 'Required parameter(s) missing. Specify --help (-h) for usage.';
-      end
-    else if (CountSetBits(ReqArgsAction) > 1) or (CountSetBits(ReqArgsPathType) > 1) then
-      begin
+    end
+    else if (CountBits(ReqArgsAction) > 1) or (CountBits(ReqArgsPathType) > 1) then
+    begin
       ErrorCode := ERROR_INVALID_PARAMETER;
       ErrorMessage := 'Mutually exclusive parameter(s) specified. Specify --help (-h) for usage.';
-      end;
     end;
   end;
+end;
 
-function TranslateErrorCode(const Code: DWORD): unicodestring;
-  begin
+function TranslateErrorCode(const Code: DWORD): UnicodeString;
+begin
   case Code of
     ERROR_FILE_NOT_FOUND:
       result := 'The Path value is not present in the registry. (2)';
@@ -298,16 +298,19 @@ function TranslateErrorCode(const Code: DWORD): unicodestring;
       result := 'The specified directory does not exist in the Path. (3)';
     ERROR_ALREADY_EXISTS:
       result := 'The specified directory already exists in the Path. (183)';
-    else
-      result := GetWindowsMessage(Code, true);
-    end; //case
-  end;
+  else
+    result := GetWindowsMessage(Code, true);
+  end; //case
+end;
 
-procedure WriteOutput(const S: unicodestring);
-  begin
+procedure WriteOutput(const S: UnicodeString);
+begin
   if not CommandLine.ArgQuiet then
-    if ExitCode <> 0 then WriteLn(ErrOutput, S) else WriteLn(S);
-  end;
+    if ExitCode <> 0 then
+      WriteLn(ErrOutput, S)
+    else
+      WriteLn(S);
+end;
 
 begin
   // Parse the command line using getopts
@@ -315,17 +318,17 @@ begin
 
   // --help/-h or /?
   if CommandLine.ArgHelp or (ParamStr(1) = '/?') then
-    begin
+  begin
     Usage();
     exit();
-    end;
+  end;
 
   ExitCode := CommandLine.ErrorCode;
   if ExitCode <> 0 then
-    begin
+  begin
     WriteLn(CommandLine.ErrorMessage);
     exit();
-    end;
+  end;
 
   PathType := UserPath;
   if CommandLine.ArgPathSystem then
@@ -334,50 +337,50 @@ begin
     PathType := UserPath;
 
   if CommandLine.ArgAddToPath <> '' then
-    begin
+  begin
     if CommandLine.ArgAddToBeginning then
       PathAddType := AppendPathToDir
     else
       PathAddType := AppendDirToPath;
     ExitCode := wsAddDirToPath(CommandLine.ArgAddToPath, PathType, PathAddType);
     WriteOutput(TranslateErrorCode(ExitCode));
-    end
+  end
   else if CommandLine.ArgList then
-    begin
+  begin
     ExitCode := wsGetPath(PathType, CommandLine.ArgExpand, OutputStr);
     if (ExitCode = 0) and (OutputStr <> '') then
       WriteLn(OutputStr)
     else if ExitCode <> 0 then
       WriteOutput(TranslateErrorCode(ExitCode));
-    end
+  end
   else if CommandLine.ArgRemoveFromPath <> '' then
-    begin
+  begin
     ExitCode := wsRemoveDirFromPath(CommandLine.ArgRemoveFromPath, PathType);
     WriteOutput(TranslateErrorCode(ExitCode));
-    end
+  end
   else if CommandLine.ArgTest <> '' then
-    begin
+  begin
     OutputStr := '';
     ExitCode := wsIsDirInPath(CommandLine.ArgTest, PathType, PathFindType);
     if ExitCode = 0 then
-      begin
+    begin
       case PathFindType of
         FoundInUnexpandedPath:
-          begin
-          ExitCode := DWORD(FoundInUnexpandedPath);
+        begin
+          ExitCode := LongInt(FoundInUnexpandedPath);
           OutputStr := 'The specified directory exists in the unexpanded Path. (1)';
-          end;
+        end;
         FoundInExpandedPath:
-          begin
-          ExitCode := DWORD(FoundInExpandedPath);
+        begin
+          ExitCode := LongInt(FoundInExpandedPath);
           OutputStr := 'The specified directory exists in the expanded Path. (2)';
-          end;
-        end; //case
-      end;
+        end;
+      end; //case
+    end;
     if OutputStr <> '' then
       WriteOutput(OutputStr)
     else
       WriteOutput(TranslateErrorCode(ExitCode));
-    end;
+  end;
 
 end.

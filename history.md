@@ -1,5 +1,17 @@
 # PathMgr.dll Version History
 
+## 1.0.3 (10 Jun 2021)
+
+* Update code formatting.
+
+* String-read from registry updated to avoid potential (but very low probability) buffer overflow error.
+
+* Correct typographical errors in EditPath markdown doc.
+
+* Compile using FPC 3.2.2.
+
+* Minor tweaks.
+
 ## 1.0.2 (18 Mar 2021)
 
 * Fix Inno Setup script sample: Modify path both when task was previously selected or currently selected.

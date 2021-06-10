@@ -19,56 +19,59 @@
 {$H+}
 {$R *.res}
 
-library
-  PathMgr;
+library PathMgr;
 
 uses
-  windows,
+  Windows,
   wsPathMgr;
 
-procedure CopyString(const Source: unicodestring; Dest: pwidechar);
-  var
-    NumChars: DWORD;
-  begin
+procedure CopyString(const Source: UnicodeString; Dest: PWideChar);
+var
+  NumChars: DWORD;
+begin
   NumChars := Length(Source);
-  Move(Source[1], Dest^, NumChars * SizeOf(widechar));
+  Move(Source[1], Dest^, NumChars * SizeOf(WideChar));
   Dest[NumChars] := #0;
-  end;
+end;
 
-function AddDirToPath(const DirName: pwidechar; const PathType, AddType: DWORD): DWORD; stdcall;
-  begin
-  if (PathType > 1) or (AddType > 1) then exit(ERROR_INVALID_PARAMETER);
+function AddDirToPath(const DirName: PWideChar; const PathType, AddType: DWORD): DWORD; stdcall;
+begin
+  if (PathType > 1) or (AddType > 1) then
+    exit(ERROR_INVALID_PARAMETER);
   result := wsAddDirToPath(DirName, TPathType(PathType), TPathAddType(AddType));
-  end;
+end;
 
-function GetPath(const PathType, Expand: DWORD; Buffer: pwidechar; const NumChars: DWORD): DWORD; stdcall;
-  var
-    Path: unicodestring;
-  begin
+function GetPath(const PathType, Expand: DWORD; Buffer: PWideChar; const NumChars: DWORD): DWORD; stdcall;
+var
+  Path: UnicodeString;
+begin
   result := 0;
-  if PathType > 1 then exit();
+  if PathType > 1 then
+    exit();
   if wsGetPath(TPathType(PathType), Expand <> 0, Path) = 0 then
-    begin
+  begin
     if (Length(Path) > 0) and Assigned(Buffer) and (NumChars >= Length(Path)) then
       CopyString(Path, Buffer);
     result := Length(Path);
-    end;
   end;
+end;
 
-function IsDirInPath(const DirName: pwidechar; const PathType: DWORD; FindType: PDWORD): DWORD; stdcall;
-  var
-    PathFindType: TPathFindType;
-  begin
-  if PathType > 1 then exit(ERROR_INVALID_PARAMETER);
+function IsDirInPath(const DirName: PWideChar; const PathType: DWORD; FindType: PDWORD): DWORD; stdcall;
+var
+  PathFindType: TPathFindType;
+begin
+  if PathType > 1 then
+    exit(ERROR_INVALID_PARAMETER);
   result := wsIsDirInPath(DirName, TPathType(PathType), PathFindType);
   FindType^ := DWORD(PathFindType);
-  end;
+end;
 
-function RemoveDirFromPath(const DirName: pwidechar; const PathType: DWORD): DWORD; stdcall;
-  begin
-  if PathType > 1 then exit(ERROR_INVALID_PARAMETER);
+function RemoveDirFromPath(const DirName: PWideChar; const PathType: DWORD): DWORD; stdcall;
+begin
+  if PathType > 1 then
+    exit(ERROR_INVALID_PARAMETER);
   result := wsRemoveDirFromPath(DirName, TPathType(PathType));
-  end;
+end;
 
 exports
   AddDirToPath,
