@@ -1,4 +1,4 @@
-{ Copyright (C) 2021 by Bill Stewart (bstewart at iname.com)
+{ Copyright (C) 2021-2023 by Bill Stewart (bstewart at iname.com)
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,9 @@
 unit wsUtilStr;
 
 interface
+
+uses
+  Windows;
 
 type
   TArrayOfString = array of UnicodeString;
@@ -51,12 +54,9 @@ function StrHasNonWhitespace(const S: UnicodeString): Boolean;
 function StrToIntDef(const S: UnicodeString; const Def: LongInt): LongInt;
 
 // Converts the specified string to a Unicode string and returns the result
-function StringToUnicodeString(const S: string): UnicodeString;
+function StringToUnicodeString(const S: string; const CodePage: UINT): UnicodeString;
 
 implementation
-
-uses
-  Windows;
 
 function StrHasNonWhitespace(const S: UnicodeString): Boolean;
 const
@@ -64,14 +64,13 @@ const
 var
   I: LongInt;
 begin
-  result := S <> '';
-  if result then
-    for I := 1 to Length(S) do
-      if not (S[I] in Whitespace) then
-      begin
-        result := true;
-        break;
-      end;
+  result := false;
+  for I := 1 to Length(S) do
+    if not (S[I] in Whitespace) then
+    begin
+      result := true;
+      break;
+    end;
 end;
 
 // See MSDN topic titled "Naming Files, Paths, and Namespaces" - currently at
@@ -225,14 +224,14 @@ begin
     result := Def;
 end;
 
-function StringToUnicodeString(const S: string): UnicodeString;
+function StringToUnicodeString(const S: string; const CodePage: UINT): UnicodeString;
 var
   NumChars, BufSize: DWORD;
   pBuffer: PWideChar;
 begin
   result := '';
   // Get number of characters needed for buffer
-  NumChars := MultiByteToWideChar(CP_OEMCP,  // UINT   CodePage
+  NumChars := MultiByteToWideChar(CodePage,  // UINT   CodePage
     0,                                       // DWORD  dwFlags
     PChar(S),                                // LPCCH  lpMultiByteStr
     -1,                                      // int    cbMultiByte
@@ -253,14 +252,14 @@ begin
   end;
 end;
 
-function UnicodeStringToString(const S: UnicodeString): string;
+function UnicodeStringToString(const S: UnicodeString; const CodePage: UINT): string;
 var
   NumChars, BufSize: DWORD;
   pBuffer: PChar;
 begin
   result := '';
   // Get number of characters needed for buffer
-  NumChars := WideCharToMultiByte(CP_OEMCP,  // UINT   CodePage
+  NumChars := WideCharToMultiByte(CodePage,  // UINT   CodePage
     0,                                       // DWORD  dwFlags
     PWideChar(S),                            // LPCWCH lpWideCharStr
     -1,                                      // int    cchWideChar

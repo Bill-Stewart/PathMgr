@@ -1,4 +1,4 @@
-; Copyright (C) 2021 by Bill Stewart (bstewart at iname.com)
+; Copyright (C) 2021-2023 by Bill Stewart (bstewart at iname.com)
 ;
 ; This program is free software; you can redistribute it and/or modify it under
 ; the terms of the GNU Lesser General Public License as published by the Free
@@ -34,7 +34,7 @@
 [Setup]
 AppId={{A17D2D05-C729-4F2A-9CC7-E04906C5A842}
 AppName=EditPath
-AppVersion=4.0.3.0
+AppVersion=4.0.4.0
 UsePreviousAppDir=false
 DefaultDirName={autopf}\EditPath
 Uninstallable=true
@@ -49,12 +49,12 @@ PrivilegesRequiredOverridesAllowed=dialog
 ; uninsneveruninstall flag because DeinitializeSetup() will delete after
 ; unloading the DLL; install the 32-bit version of PathMgr.dll because both
 ; setup and uninstall executables are 32-bit
-Source: "x86\PathMgr.dll";  DestDir: "{app}"; Flags: uninsneveruninstall
+Source: "i386\PathMgr.dll";  DestDir: "{app}"; Flags: uninsneveruninstall
 
 ; Other files to install on target system
-Source: "x64\EditPath.exe"; DestDir: "{app}"; Check: Is64BitInstallMode()
-Source: "x86\EditPath.exe"; DestDir: "{app}"; Check: not Is64BitInstallMode()
-Source: "EditPath.md";      DestDir: "{app}"
+Source: "i386\EditPath.exe";   DestDir: "{app}"; Check: not Is64BitInstallMode()
+Source: "x86_64\EditPath.exe"; DestDir: "{app}"; Check: Is64BitInstallMode()
+Source: "EditPath.md";         DestDir: "{app}"
 
 [Tasks]
 Name: modifypath; Description: "&Add to Path"
@@ -64,7 +64,8 @@ const
   MODIFY_PATH_TASK_NAME = 'modifypath';  // Specify name of task
 
 var
-  PathIsModified: Boolean;  // Cache task selection from previous installs
+  PathIsModified: Boolean;          // Cache task selection from previous installs
+  ApplicationUninstalled: Boolean;  // Has application been uninstalled?
 
 // Import AddDirToPath() at setup time ('files:' prefix)
 function DLLAddDirToPath(DirName: string; PathType, AddType: DWORD): DWORD;
@@ -124,6 +125,7 @@ begin
   result := true;
   // Was task selected during a previous install?
   PathIsModified := GetPreviousData(MODIFY_PATH_TASK_NAME, '') = 'true';
+  ApplicationUninstalled := false;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -144,13 +146,20 @@ begin
     // use variable because we can't use WizardIsTaskSelected() at uninstall
     if PathIsModified then
       RemoveDirFromPath(ExpandConstant('{app}'));
+  end
+  else if CurUninstallStep = usPostUninstall then
+  begin
+    ApplicationUninstalled := true;
   end;
 end;
 
 procedure DeinitializeUninstall();
 begin
-  // Unload and delete PathMgr.dll and remove app dir when uninstalling
-  UnloadDLL(ExpandConstant('{app}\PathMgr.dll'));
-  DeleteFile(ExpandConstant('{app}\PathMgr.dll'));
-  RemoveDir(ExpandConstant('{app}'));
+  if ApplicationUninstalled then
+  begin
+    // Unload and delete PathMgr.dll and remove app dir when uninstalling
+    UnloadDLL(ExpandConstant('{app}\PathMgr.dll'));
+    DeleteFile(ExpandConstant('{app}\PathMgr.dll'));
+    RemoveDir(ExpandConstant('{app}'));
+  end;
 end;

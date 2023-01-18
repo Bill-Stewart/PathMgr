@@ -1,4 +1,4 @@
-{ Copyright (C) 2004-2021 by Bill Stewart (bstewart at iname.com)
+{ Copyright (C) 2004-2023 by Bill Stewart (bstewart at iname.com)
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU Lesser General Public License as published by the Free
@@ -60,7 +60,7 @@ const
 var
   UsageText: UnicodeString;
 begin
-  UsageText := 'EditPath 4.0 - Copyright (C) 2004-2021 by Bill Stewart (bstewart at iname.com)' + NEWLINE
+  UsageText := 'EditPath 4.0 - Copyright (C) 2004-2023 by Bill Stewart (bstewart at iname.com)' + NEWLINE
     + NEWLINE
     + 'This is free software and comes with ABSOLUTELY NO WARRANTY.' + NEWLINE
     + NEWLINE
@@ -236,7 +236,7 @@ begin
       'a':
       begin
         ReqArgsAction := ReqArgsAction or REQ_ARGS_ACTION_ADD;
-        ArgAddToPath := StringToUnicodeString(OptArg);
+        ArgAddToPath := StringToUnicodeString(OptArg, CP_ACP);
       end;
       'b': ArgAddToBeginning := true;
       'h': ArgHelp := true;
@@ -249,7 +249,7 @@ begin
       'r':
       begin
         ReqArgsAction := ReqArgsAction or REQ_ARGS_ACTION_REMOVE;
-        ArgRemoveFromPath := StringToUnicodeString(OptArg);
+        ArgRemoveFromPath := StringToUnicodeString(OptArg, CP_ACP);
       end;
       's':
       begin
@@ -259,7 +259,7 @@ begin
       't':
       begin
         ReqArgsAction := ReqArgsAction or REQ_ARGS_ACTION_TEST;
-        ArgTest := StringToUnicodeString(OptArg);
+        ArgTest := StringToUnicodeString(OptArg, CP_ACP);
       end;
       'u':
       begin

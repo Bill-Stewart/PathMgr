@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION 1,0,3,0
-PRODUCTVERSION 1,0,3,0
+FILEVERSION 1,0,4,0
+PRODUCTVERSION 1,0,4,0
 FILEOS 0x4
 FILETYPE 1
 {
@@ -10,12 +10,12 @@ FILETYPE 1
     {
       VALUE "CompanyName", ""
       VALUE "FileDescription", "PathMgr.dll"
-      VALUE "FileVersion", "1.0.3.0"
+      VALUE "FileVersion", "1.0.4.0"
       VALUE "InternalName", "PathMgr.dll"
-      VALUE "LegalCopyright", "Copyright 2021 by Bill Stewart (bstewart at iname.com)"
+      VALUE "LegalCopyright", "Copyright 2021-2023 by Bill Stewart (bstewart at iname.com)"
       VALUE "OriginalFilename", "PathMgr.dll"
       VALUE "ProductName", ""
-      VALUE "ProductVersion", "1.0.3.0"
+      VALUE "ProductVersion", "1.0.4.0"
     }
   }
 

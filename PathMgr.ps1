@@ -1,4 +1,4 @@
-# Copyright (C) 2021 by Bill Stewart (bstewart at iname.com)
+# Copyright (C) 2021-2023 by Bill Stewart (bstewart at iname.com)
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -18,8 +18,8 @@
 # Demo script for functions in PathMgr.dll
 
 # Prerequisites:
-# * 64-bit PathMgr.dll in x64 directory
-# * 32-bit PathMgr.dll in x86 directory
+# * 32-bit PathMgr.dll in i386 directory
+# * 64-bit PathMgr.dll in x86_x64 directory
 
 [CmdletBinding(DefaultParameterSetName = "List")]
 param(
@@ -58,10 +58,10 @@ param(
 
 function Get-Platform {
   if ( [IntPtr]::Size -eq 8 ) {
-    "x64"
+    "x86_64"
   }
   else {
-    "x86"
+    "i386"
   }
 }
 

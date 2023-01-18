@@ -1,5 +1,13 @@
 # PathMgr.dll Version History
 
+## 1.0.4 (18 Jan 2023)
+
+* Fix Inno Setup script sample: Delete PathMgr.dll only if uninstall was not canceled by user. (Thanks to vadimgrn on GitHub for reporting this issue.)
+
+* Fix: Strings containing non-whitespace characters detected correctly.
+
+* Minor tweaks.
+
 ## 1.0.3 (10 Jun 2021)
 
 * Update code formatting.
