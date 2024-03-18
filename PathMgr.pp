@@ -1,4 +1,4 @@
-{ Copyright (C) 2021 by Bill Stewart (bstewart at iname.com)
+{ Copyright (C) 2021-2024 by Bill Stewart (bstewart at iname.com)
 
   This program is free software; you can redistribute it and/or modify it under
   the terms of the GNU Lesser General Public License as published by the Free
@@ -16,61 +16,64 @@
 }
 
 {$MODE OBJFPC}
-{$H+}
+{$MODESWITCH UNICODESTRINGS}
 {$R *.res}
 
 library PathMgr;
 
 uses
   Windows,
-  wsPathMgr;
+  WindowsPath;
 
-procedure CopyString(const Source: UnicodeString; Dest: PWideChar);
+procedure CopyString(const Source: string; Dest: PChar);
 var
   NumChars: DWORD;
 begin
   NumChars := Length(Source);
-  Move(Source[1], Dest^, NumChars * SizeOf(WideChar));
+  Move(Source[1], Dest^, NumChars * SizeOf(Char));
   Dest[NumChars] := #0;
 end;
 
-function AddDirToPath(const DirName: PWideChar; const PathType, AddType: DWORD): DWORD; stdcall;
-begin
-  if (PathType > 1) or (AddType > 1) then
-    exit(ERROR_INVALID_PARAMETER);
-  result := wsAddDirToPath(DirName, TPathType(PathType), TPathAddType(AddType));
-end;
-
-function GetPath(const PathType, Expand: DWORD; Buffer: PWideChar; const NumChars: DWORD): DWORD; stdcall;
+function GetPath(PathType, Expand: DWORD; Buffer: PChar; NumChars: DWORD): DWORD; stdcall;
 var
-  Path: UnicodeString;
+  Path: string;
 begin
-  result := 0;
   if PathType > 1 then
-    exit();
-  if wsGetPath(TPathType(PathType), Expand <> 0, Path) = 0 then
+    PathType := 1;
+  if WindowsPath.GetPath(TPathType(PathType), Expand <> 0, Path) = ERROR_SUCCESS then
   begin
-    if (Length(Path) > 0) and Assigned(Buffer) and (NumChars >= Length(Path)) then
-      CopyString(Path, Buffer);
     result := Length(Path);
-  end;
+    if (result > 0) and (result <= NumChars) and Assigned(Buffer) then
+      CopyString(Path, Buffer);
+  end
+  else
+    result := 0;
 end;
 
-function IsDirInPath(const DirName: PWideChar; const PathType: DWORD; FindType: PDWORD): DWORD; stdcall;
+function IsDirInPath(DirName: PChar; PathType: DWORD; FindType: PDWORD): DWORD; stdcall;
 var
   PathFindType: TPathFindType;
 begin
   if PathType > 1 then
-    exit(ERROR_INVALID_PARAMETER);
-  result := wsIsDirInPath(DirName, TPathType(PathType), PathFindType);
+    PathType := 1;
+  result := WindowsPath.IsDirInPath(string(DirName), TPathType(PathType), PathFindType);
   FindType^ := DWORD(PathFindType);
 end;
 
-function RemoveDirFromPath(const DirName: PWideChar; const PathType: DWORD): DWORD; stdcall;
+function AddDirToPath(DirName: PChar; PathType, AddType: DWORD): DWORD; stdcall;
 begin
   if PathType > 1 then
-    exit(ERROR_INVALID_PARAMETER);
-  result := wsRemoveDirFromPath(DirName, TPathType(PathType));
+    PathType := 1;
+  if AddType > 1 then
+    AddType := 1;
+  result := WindowsPath.AddDirToPath(string(DirName), TPathType(PathType), TPathAddType(AddType));
+end;
+
+function RemoveDirFromPath(DirName: PChar; PathType: DWORD): DWORD; stdcall;
+begin
+  if PathType > 1 then
+    PathType := 1;
+  result := WindowsPath.RemoveDirFromPath(string(DirName), TPathType(PathType));
 end;
 
 exports

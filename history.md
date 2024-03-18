@@ -1,4 +1,16 @@
-# PathMgr.dll Version History
+# PathMgr/PathMan Version History
+
+## 2.0.0 (18 Mar 2024)
+
+* Added support for directory names containing the `;` character. Such directories are enclosed in quotes (`"`) in the Path string.
+
+* Updated all character and string processing code to use Unicode only.
+
+* Fix: If adding an environment variable as a directory name and it expands to a drive letter and path only (e.g., `%SystemDrive%`), add trailing `\`).
+
+* Redesigned EditPath utility, renamed it to PathMan, and set at version 2.0.0.0 to match the PathMgr.dll file.
+
+* Corrected file type in PathMgr.dll resource.
 
 ## 1.0.4 (18 Jan 2023)
 
@@ -28,7 +40,7 @@
 
 ## 1.0.1 (29 Jan 2021)
 
-* Fix: Validate `PathType` parameter for `IsDirInPath()` function.
+* Fix: Validate `PathType` parameter for `IsDirInPath` function.
 
 * Fix: Corrected version check for Inno Setup sample script (thanks to Martijn Laan).
 

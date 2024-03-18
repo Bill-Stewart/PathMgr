@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 by Bill Stewart (bstewart at iname.com)
+# Copyright (C) 2021-2024 by Bill Stewart (bstewart at iname.com)
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -188,13 +188,24 @@ function RemoveDirFromPath {
   $PathMgr::RemoveDirFromPath($dirName,$intPathType)
 }
 
-function GetMessageFromID {
+# Outputs the message associated with a message id; -asError parameter causes
+# output as an error message - "Error <n> (0x<n>) - <message>"
+function Get-MessageDescription {
   param(
-    [UInt32]
-    $messageID
+    $messageId,
+
+    [Switch]
+    $asError
   )
-  $stdOut = & "$env:SystemRoot\System32\net.exe" helpmsg $messageID | Out-String -Width ([Int32]::MaxValue)
-  "{0} - {1}" -f $messageID,($stdOut -replace [Environment]::NewLine,"")
+  # message id must be Int32
+  $intId = [BitConverter]::ToInt32([BitConverter]::GetBytes($messageId),0)
+  $message = ([ComponentModel.Win32Exception] $intId).Message
+  if ( $asError ) {
+    "{0} ({1})" -f $message,$messageId
+  }
+  else {
+    "{0}" -f $message
+  }
 }
 
 $ExitCode = 0
@@ -212,11 +223,12 @@ switch ( $PSCmdlet.ParameterSetName ) {
   }
   "Add" {
     $ExitCode = AddDirToPath $PathType $Add -Beginning:$Beginning
-    GetMessageFromId $ExitCode
+    Get-MessageDescription $ExitCode -asError:($ExitCode -ne 0)
   }
   "Remove" {
     $ExitCode = RemoveDirFromPath $PathType $Remove
-    GetMessageFromId $ExitCode
+    Get-MessageDescription $ExitCode -asError:($ExitCode -ne 0)
   }
 }
+
 exit $ExitCode

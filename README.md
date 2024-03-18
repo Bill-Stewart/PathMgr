@@ -1,6 +1,6 @@
-# PathMgr.dll
+# PathMgr/PathMan
 
-PathMgr.dll is a Windows DLL (dynamically linked library) for managing the system Path and user Path.
+PathMgr.dll is a Windows DLL (dynamically linked library) for managing the directories in the system Path and user Path. PathMan.exe is a command-line equivalent.
 
 # Author
 
@@ -8,7 +8,7 @@ Bill Stewart - bstewart at iname dot com
 
 # License
 
-PathMgr.dll is covered by the GNU Lesser Public License (LPGL). See the file `LICENSE` for details.
+PathMgr.dll and PathMan.exe are covered by the GNU Lesser Public License (LPGL). See the file `LICENSE` for details.
 
 # Download
 
@@ -36,7 +36,7 @@ PathMgr.dll provides an API for managing the `Path` value in the system location
 
 PathMgr.dll is designed for applications (such as installers) that don't provide a built-in set of APIs or interfaces to manage the system or current user Path. There are both 32-bit (x86) and 64-bit (x64) versions.
 
-If you prefer, the EditPath program is a command-line tool that provides the same functionality as PathMgr.dll. (EditPath does not require PathMgr.dll.)
+If you prefer, the Pathman.exe program is a command-line tool that provides the same functionality as PathMgr.dll in a single executable (i.e., PathMan.exe does not require PathMgr.dll).
 
 # Functions
 
@@ -44,9 +44,9 @@ This section documents the functions exported by PathMgr.dll.
 
 ---
 
-## AddDirToPath()
+## AddDirToPath
 
-The `AddDirToPath()` function adds a directory to the Path.
+The `AddDirToPath` function adds a directory to the Path.
 
 ### Syntax
 
@@ -78,23 +78,32 @@ Specify 0 to add the directory to the end of the Path or 1 to add the directory 
 
 If the specified directory already exists in the Path, the function returns `ERROR_ALREADY_EXISTS` (183). Otherwise, the function returns 0 for success or non-zero for failure.
 
-The function returns `ERROR_INVALID_PARAMETER` (87) for any of the following cases:
-
-* `DirName` specifies an invalid directory name
-* `PathType` is not a valid value
-* `AddType` is not a valid value
+The function will return `ERROR_INVALID_PARAMETER` (87) if the `DirName` parameter specifies an invalid directory name.
 
 Updating the system Path requires administrative permissions; if you attempt to update the system Path from an unelevated process, the function will return `ERROR_ACCESS_DENIED` (5).
 
 ### Remarks
 
-The `AddDirToPath()` function checks whether the directory name exists in both the unexpanded and expanded copies of the Path. For example, if one of the directories in the Path is `%TESTAPP%`, and the `TESTAPP` environment variable is set to `C:\Test`, the function will return `ERROR_ALREADY_EXISTS` (183) if you specify either `%TESTAPP%` or `C:\Test` for the `DirName` parameter.
+The `AddDirToPath` function checks whether the directory name exists in both the unexpanded and expanded copies of the Path. For example, if one of the directories in the Path is `%TESTAPP%`, and the `TESTAPP` environment variable is set to `C:\Test`, the function will return `ERROR_ALREADY_EXISTS` (183) if you specify either `%TESTAPP%` or `C:\Test` for the `DirName` parameter.
+
+If a directory name contains the `;` character, the `AddDirToPath` function will add it to the Path in the registry with surrounding quote characters (`"`). The quotes around the directory name are required to inform the operating system that the enclosed string is a single directory name. For example, consider the following Path string:
+
+    C:\dir 1;"C:\dir;2";C:\dir3
+
+Without the quote marks enclosing the `C:\dir;2` directory, the system would incorrectly "split" the path name into the following directory names:
+
+    C:\dir 1
+    C:\dir
+    2
+    C:\dir3
+
+In other words, the `"` characters around the `C:\dir;2` directory "protect" the `;` character and inform the system that `C:\dir;2` is a single directory name. (The `"` marks themselves are not part of the directory name.)
 
 ---
 
-## GetPath()
+## GetPath
 
-The `GetPath()` function retrieves a newline-delimited list of directories in the Path.
+The `GetPath` function retrieves a newline-delimited list of directories in the Path.
 
 ### Syntax
 
@@ -132,9 +141,9 @@ The function returns zero if it failed, or non-zero if it succeeded.
 
 ---
 
-## IsDirInPath()
+## IsDirInPath
 
-The `IsDirInPath()` function checks whether a directory exists in the Path.
+The `IsDirInPath` function checks whether a directory exists in the Path.
 
 ### Syntax
 
@@ -177,7 +186,7 @@ The function returns `ERROR_INVALID_PARAMETER` (87) for any of the following cas
 
 ### Remarks
 
-The `IsDirInPath()` function tests whether the directory name exists in the unexpanded Path (i.e., the Path value extracted from the registry without expanding any environment variable references). If the directory name exists in the unexpanded Path, the function will return 0 and the variable pointed to by the `FindType` parameter will be set to 1.
+The `IsDirInPath` function tests whether the directory name exists in the unexpanded Path (i.e., the Path value extracted from the registry without expanding any environment variable references). If the directory name exists in the unexpanded Path, the function will return 0 and the variable pointed to by the `FindType` parameter will be set to 1.
 
 If the directory name does not exist in the unexpanded Path, the function then expands the environment variable references in the directory name and and the Path. If the expanded directory name exists in the expanded Path, the function will return 0 and the variable pointed to by the `FindType` parameter will be set to 2.
 
@@ -192,7 +201,7 @@ and given the function parameters:
 * `DirName`: %SystemRoot%
 * `PathType`: 0
 
-`IsDirInPath()` will return 0 and the variable pointed to by the `FindType` parameter will be set to 1, because the directory name in the `DirName` parameter exists in the unexpanded copy of the system Path.
+`IsDirInPath` will return 0 and the variable pointed to by the `FindType` parameter will be set to 1, because the directory name in the `DirName` parameter exists in the unexpanded copy of the system Path.
 
 If the `%SystemRoot%` environment variable is `C:\Windows` and you specify `C:\Windows` for the `DirName` parameter, the function will also return 0 but the variable pointed to by the `FindType` parameter will be set to 2 instead of 1 because the directory name was found in the expanded copy of the system Path.
 
@@ -207,15 +216,15 @@ and given the function parameters:
 * `DirName`: C:\Users\myname\AppData\Local\Programs\My App
 * `PathType`: 1
 
-Presuming that the `LOCALAPPDATA` environment variable is `C:\Users\myname\AppData\Local`, `IsDirInPath()` will return 0 and the variable pointed to by the `FindType` parameter will be set to 2, because the directory name in the `DirName` parameter exists in the expanded copy of the current user Path.
+Presuming that the `LOCALAPPDATA` environment variable is `C:\Users\myname\AppData\Local`, `IsDirInPath` will return 0 and the variable pointed to by the `FindType` parameter will be set to 2, because the directory name in the `DirName` parameter exists in the expanded copy of the current user Path.
 
 If you specify `%LOCALAPPDATA%\Programs\My App` for the `DirName` parameter, the function will also return 0 but the variable pointed to by the `FindType` parameter will be set to 1 instead of 2 because the directory name was found in the unexpanded copy of the current user Path.
 
 ---
 
-## RemoveDirFromPath()
+## RemoveDirFromPath
 
-The `RemoveDirFromPath()` function removes a directory from the Path.
+The `RemoveDirFromPath` function removes a directory from the Path.
 
 ### Syntax
 
@@ -252,4 +261,4 @@ Updating the system Path requires administrative permissions; if you attempt to 
 
 ### Remarks
 
-The `RemoveDirFromPath()` function only checks whether the directory name exists in the unexpanded copy of the Path. For example, if one of the directories in the Path is `%TESTAPP%`, the `TESTAPP` environment variable is set to `C:\Test`, and you specify `C:\Test` for the `DirName` parameter, the function will return `ERROR_PATH_NOT_FOUND` (3) because `C:\Test` does not exist in the unexpanded copy of the Path.
+The `RemoveDirFromPath` function only checks whether the directory name exists in the unexpanded copy of the Path. For example, if one of the directories in the Path is `%TESTAPP%`, the `TESTAPP` environment variable is set to `C:\Test`, and you specify `C:\Test` for the `DirName` parameter, the function will return `ERROR_PATH_NOT_FOUND` (3) because `C:\Test` does not exist in the unexpanded copy of the Path.

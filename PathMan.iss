@@ -1,4 +1,4 @@
-; Copyright (C) 2021-2023 by Bill Stewart (bstewart at iname.com)
+; Copyright (C) 2021-2024 by Bill Stewart (bstewart at iname.com)
 ;
 ; This program is free software; you can redistribute it and/or modify it under
 ; the terms of the GNU Lesser General Public License as published by the Free
@@ -32,14 +32,15 @@
 #endif
 
 [Setup]
-AppId={{A17D2D05-C729-4F2A-9CC7-E04906C5A842}
-AppName=EditPath
-AppVersion=4.0.4.0
+AppId={{82425B5C-8B45-4F8C-9830-3D8E2DB64581}
+AppName=PathMan
+AppVersion=2.0.0.0
 UsePreviousAppDir=false
-DefaultDirName={autopf}\EditPath
+DefaultDirName={autopf}\PathMan
+ChangesEnvironment=yes
 Uninstallable=true
 OutputDir=.
-OutputBaseFilename=EditPath_Setup
+OutputBaseFilename=PathMan-Setup
 ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=none
 PrivilegesRequiredOverridesAllowed=dialog
@@ -52,9 +53,9 @@ PrivilegesRequiredOverridesAllowed=dialog
 Source: "i386\PathMgr.dll";  DestDir: "{app}"; Flags: uninsneveruninstall
 
 ; Other files to install on target system
-Source: "i386\EditPath.exe";   DestDir: "{app}"; Check: not Is64BitInstallMode()
-Source: "x86_64\EditPath.exe"; DestDir: "{app}"; Check: Is64BitInstallMode()
-Source: "EditPath.md";         DestDir: "{app}"
+Source: "i386\PathMan.exe";   DestDir: "{app}"; Check: not Is64BitInstallMode()
+Source: "x86_64\PathMan.exe"; DestDir: "{app}"; Check: Is64BitInstallMode()
+Source: "PathMan.md";         DestDir: "{app}"
 
 [Tasks]
 Name: modifypath; Description: "&Add to Path"
